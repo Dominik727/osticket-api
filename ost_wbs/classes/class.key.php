@@ -14,33 +14,34 @@ class apiKey
     function OAuth($key)
     {
 
-        if($key) $this->key = $key;
-        if(strlen($key) != 32) { throw new Exception("Incorrect API Format"); }
+        require_once 'classes/class.dbconnection.php';
+            if($key) $this->key = $key;
+            if(strlen($key) != 32) { throw new Exception("Incorrect API Format"); }
 
-        // Connect Database
-        $Dbobj = new DBConnection(); 
-        $mysqli = $Dbobj->getDBConnect();
+            // Connect Database
+            $Dbobj = new DBConnection(); 
+            $mysqli = $Dbobj->getDBConnect();
 
-        // Check API Key
-        $stmt = $mysqli->prepare("SELECT * FROM ".TABLE_PREFIX."api_key WHERE apiKey = ?");
-        $stmt->bind_param('s', $key);
-        $stmt->execute();
+            // Check API Key
+            $stmt = $mysqli->prepare("SELECT * FROM ".TABLE_PREFIX."api_key WHERE apiKey = ?");
+            $stmt->bind_param('s', $key);
+            $stmt->execute();
 
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
 
-        $this->farray = $row; 
-        $this->countR = $result->num_rows;
+            $this->farray = $row; 
+            $this->countR = $result->num_rows;
 
-        // If exists
-        if(!$this->countR)
-            throw new Exception("No API Key found.");
-        // Check IPAddress
-        if(!$row["isactive"] || APIKEY_RESTRICT && $row["ipaddr"] != $_SERVER['REMOTE_ADDR'])
-            throw new Exception("API key not found/active or source IP not authorized");
-         
-        define('CANCREATE', $this->farray["can_create_tickets"]); // Can create
-        define('CANEXECUTE', $this->farray["can_exec_cron"]);   // Can execute
+            // If exists
+            if(!$this->countR)
+                throw new Exception("No API Key found.");
+            // Check IPAddress
+            if(!$row["isactive"] || APIKEY_RESTRICT && $row["ipaddr"] != $_SERVER['REMOTE_ADDR'])
+                throw new Exception("API key not found/active or source IP not authorized");
+            
+            define('CANCREATE', $this->farray["can_create_tickets"]); // Can create
+            define('CANEXECUTE', $this->farray["can_exec_cron"]);   // Can execute
 
     } 
 
